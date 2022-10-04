@@ -8,11 +8,14 @@ print(qualdodb)
 collections = qualdodb.list_collection_names()
 print(collections)
 
-print(" ============== Insert queries section ends ============")
+print(" ============== Create collection starts ============")
 
 
 # ============ Creating time series collections =======
 create_res = qualdodb.create_collection(
     "sample",
-    timeseries={"timeField": "date", "metaField": "", "granularity": "seconds"},
+    timeseries={"timeField": "date", "metaField": "id_dict", "granularity": "seconds"},
 )
+
+print(create_res)
+print("================== Ends =============")
