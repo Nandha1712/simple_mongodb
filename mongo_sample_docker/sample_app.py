@@ -3,7 +3,7 @@ from flask import Flask, session, request, jsonify
 app = Flask(__name__)
 
 @app.route('/check')
-def hellow(req_id, custom_msg):
+def hellow():
     n_msg = {"msg": "Hello world"}
     return jsonify(n_msg), 200
 
