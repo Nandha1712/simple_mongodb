@@ -9,6 +9,7 @@ collections = qualdodb.list_collection_names()
 print(collections)
 
 sampleCol = qualdodb.get_collection("sample")
+# Possible units - "hour", "second", "minute"
 
 max_month_close = sampleCol.aggregate(
     [
@@ -17,8 +18,9 @@ max_month_close = sampleCol.aggregate(
             "$match": {
                 "$and": [
                     {
-                        "date": {"$gt": datetime(2022, 10, 3, 20, 0), "$lt": datetime(2022, 10, 6, 20, 0)},
-                         "id_dict.data_set_id": 1
+                        "date": {"$gt": datetime(1970, 1, 3, 0, 0), "$lt": datetime(1970, 1, 20, 20, 0)},
+                         "id_dict.data_set_id": 1,
+                         "id_dict.meta_data_id": 41
                     }
                 ]
             }
@@ -31,11 +33,13 @@ max_month_close = sampleCol.aggregate(
                     "timeunit": {"$dateTrunc": {"date": "$date", "unit": "hour"}},
                     "id_dict": "$id_dict",
                 },
-                "avgHourValue": {"$avg": "$value"},
-                "avgHourDriftValue": {"$avg": "$drift_value"},
+                "avgValue": {"$avg": "$value"},
+                "maxDriftValue": {"$max": "$drift_value"},
+                "minEpoch": {"$min": "$epoch"}
             }
         },
-    ]
+    ],
+allowDiskUse=True
 )
 
 print(max_month_close)
