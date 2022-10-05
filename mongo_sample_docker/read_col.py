@@ -12,21 +12,23 @@ sampleCol = qualdodb.get_collection("sample")
 
 print(sampleCol)
 
-avg_hour_close = sampleCol.aggregate(
-    [
-        # stage 1
-        {
-            "$group": {
-                "_id": {
-                    "timeunit": {"$dateTrunc": {"date": "$date", "unit": "hour"}},
-                    "id_dict": "$id_dict",
-                },
-                "avgHourValue": {"$avg": "$value"},
-                "avgHourDriftValue": {"$avg": "$drift_value"},
-            }
-        },
-    ]
-)
+# avg_hour_close = sampleCol.aggregate(
+#     [
+#         # stage 1
+#         {
+#             "$group": {
+#                 "_id": {
+#                     "timeunit": {"$dateTrunc": {"date": "$date", "unit": "hour"}},
+#                     "id_dict": "$id_dict",
+#                 },
+#                 "avgHourValue": {"$avg": "$value"},
+#                 "avgHourDriftValue": {"$avg": "$drift_value"},
+#             }
+#         },
+#     ]
+# )
+
+avg_hour_close = sampleCol.find({})
 
 
 print(avg_hour_close)
