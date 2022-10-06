@@ -103,15 +103,19 @@ for idx in range(0, (NUMBER_OF_START_DATES - 1)):
 
 start_time2 = datetime.utcnow()
 next_root_date = root_start_date + timedelta(hours=1)
+
+date_list_initial = len(initial_dates)
 print(f"Use this {next_root_date} as next start time\n\n")
-TOTAL_PLANNED_ENTRIES = len(initial_dates) * NUMBER_OF_ENTRIES_PER_THREAD
-print(f"Total date list: {initial_dates}\n\n")
+TOTAL_PLANNED_ENTRIES = date_list_initial * NUMBER_OF_ENTRIES_PER_THREAD
+print(f"Date list x Entries per date = {date_list_initial} x {NUMBER_OF_ENTRIES_PER_THREAD}\n")
 print(f"Total planned entries: {TOTAL_PLANNED_ENTRIES}\n\n")
+
+print(f"Total date list: {initial_dates}\n\n")
 
 
 # using list comprehension
 batches = [initial_dates[i:i + NUMBER_OF_BATCHES]
-           for i in range(0, len(initial_dates), NUMBER_OF_BATCHES)]
+           for i in range(0, date_list_initial, NUMBER_OF_BATCHES)]
 print(f"Batches: {batches}\n\n")
 
 
