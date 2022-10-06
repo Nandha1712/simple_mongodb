@@ -6,14 +6,21 @@ from multiprocessing import Process
 import logging
 import os
 
-root_start_date = datetime(1970, 1, 3, 0, 0, 0)
+root_start_date = datetime(1970, 8, 11, 0, 0, 0)
 CONNECTION_STR = "mongodb://qualdoadmin:12345678@mongodb-service:27017"
 
+# Max parallel process
+MAX_PROCESS = 4
 
-# How many elements each list should have
-NUMBER_OF_BATCHES = 3
-NUMBER_OF_START_DATES = 5
-NUMBER_OF_ENTRIES_PER_THREAD = 2
+# List will be split into batches of given number. For asyncio processing
+NUMBER_OF_BATCHES = 10
+
+# Number of hour to add from given start time
+NUMBER_OF_HOURS_TO_ADD = 24
+
+# Do not increase the following constant to avoid overlap. 
+# Have it always < 3600 since greater than 3600 will overlap with next datetime
+NUMBER_OF_ENTRIES_PER_THREAD = 3500
 
 initial_dates = [root_start_date]
 
@@ -95,7 +102,7 @@ async def check_and_run_queries(dates, logger):
     await asyncio.gather(*[add_entry_to_db(c_date, logger) for c_date in dates])
 
 
-for idx in range(0, (NUMBER_OF_START_DATES - 1)):
+for idx in range(0, (NUMBER_OF_HOURS_TO_ADD - 1)):
     new_date = root_start_date + timedelta(hours=1)
     initial_dates.append(new_date)
     root_start_date = new_date
@@ -110,13 +117,23 @@ TOTAL_PLANNED_ENTRIES = date_list_initial * NUMBER_OF_ENTRIES_PER_THREAD
 print(f"Date list x Entries per date = {date_list_initial} x {NUMBER_OF_ENTRIES_PER_THREAD}\n")
 print(f"Total planned entries: {TOTAL_PLANNED_ENTRIES}\n\n")
 
-print(f"Total date list: {initial_dates}\n\n")
+# print(f"Total date list: {initial_dates}\n\n")
 
 
-# using list comprehension
+# Split the long list into batches. Entries in each batch will be run
+# inside asyncio process parallely
 batches = [initial_dates[i:i + NUMBER_OF_BATCHES]
            for i in range(0, date_list_initial, NUMBER_OF_BATCHES)]
-print(f"Batches: {batches}\n\n")
+
+# Split them based on number of max multi process allowed.
+# If max process is given as 4. At a time only 4 process will run parallely
+# Remaining will run after previous 4 process gets completed
+process_based_batches = [batches[i:i + MAX_PROCESS]
+           for i in range(0, len(batches), MAX_PROCESS)]
+
+# print(f"Process based Batches: {process_based_batches}\n\n")
+print(f"Length of top level batch: {len(process_based_batches)}\n"
+      f"Length of inner level batch: {len(batches)}\n")
 
 
 def process_dates_in_a_process(date_list):
@@ -136,15 +153,22 @@ def process_dates_in_a_process(date_list):
 
 
 if __name__ == '__main__':
-    process_list = []
-    for curr_dates in batches:
-        p = Process(target=process_dates_in_a_process, args=(curr_dates,))
-        p.start()
-        process_list.append(p)
+    index = 0
+    for small_batches in process_based_batches:
+        process_list = []
+        index = index + 1
+        start_time_p = datetime.utcnow()
+        for curr_dates in small_batches:
+            p = Process(target=process_dates_in_a_process, args=(curr_dates,))
+            p.start()
+            process_list.append(p)
 
+        for curr_process in process_list:
+            curr_process.join()
 
-    for curr_process in process_list:
-        curr_process.join()
+        end_time_p = datetime.utcnow()
+        time_taken_batch = (end_time_p - start_time_p).total_seconds()
+        print(f"Time taken: {time_taken_batch} seconds. index: {index}")
 
 
     end_time2 = datetime.utcnow()

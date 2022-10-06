@@ -69,3 +69,7 @@ for i in max_month_close:
 end_time2 = datetime.utcnow()
 time_taken2 = (end_time2 - start_time2).total_seconds()
 print(f"time taken2 for loop: {time_taken2} seconds")
+
+
+time_taken_total = (end_time2 - start_time0).total_seconds()
+print(f"Total time taken: {time_taken_total} seconds")
