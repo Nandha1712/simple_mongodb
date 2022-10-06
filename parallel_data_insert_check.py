@@ -6,13 +6,16 @@ from multiprocessing import Process
 import logging
 import os
 
+top_start_time = datetime.utcnow()
+print(f"Execution start time: {top_start_time}")
 root_start_date = datetime(1970, 8, 11, 0, 0, 0)
 CONNECTION_STR = "mongodb://qualdoadmin:12345678@mongodb-service:27017"
 
 # Max parallel process
 MAX_PROCESS = 4
 
-# List will be split into batches of given number. For asyncio processing
+# List will be split into batches of given number. For asyncio processing.
+# Each process will run given number of async process parallely inside a process
 NUMBER_OF_BATCHES = 10
 
 # Number of hour to add from given start time
@@ -154,10 +157,15 @@ def process_dates_in_a_process(date_list):
 
 if __name__ == '__main__':
     index = 0
+    entries_planned = MAX_PROCESS * NUMBER_OF_BATCHES * NUMBER_OF_ENTRIES_PER_THREAD
+    print(f"Entries planned in each top loop: {entries_planned} entries")
+
     for small_batches in process_based_batches:
         process_list = []
         index = index + 1
         start_time_p = datetime.utcnow()
+        print(f"Index {index} started @ {start_time_p}")
+        
         for curr_dates in small_batches:
             p = Process(target=process_dates_in_a_process, args=(curr_dates,))
             p.start()
