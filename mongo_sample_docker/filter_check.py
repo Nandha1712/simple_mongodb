@@ -18,7 +18,7 @@ print(f"time taken01: {time_taken01} seconds")
 
 start_time02 = datetime.utcnow()
 sampleCol = qualdodb.get_collection("sample")
-# Possible units - "hour", "second", "minute"
+# Possible units - "hour", "second", "minute", "month"
 
 end_time02 = datetime.utcnow()
 time_taken02 = (end_time02 - start_time02).total_seconds()
@@ -33,7 +33,7 @@ max_month_close = sampleCol.aggregate(
             "$match": {
                 "$and": [
                     {
-                        "date": {"$gt": datetime(1970, 1, 3, 0, 0), "$lt": datetime(1970, 1, 6, 1, 3)},
+                        "date": {"$gt": datetime(1970, 1, 3, 0, 0), "$lt": datetime(1971, 1, 6, 1, 3)},
                          "id_dict.data_set_id": 1,
                          "id_dict.meta_data_id": 41
                     }
@@ -45,7 +45,7 @@ max_month_close = sampleCol.aggregate(
         {
             "$group": {
                 "_id": {
-                    "timeunit": {"$dateTrunc": {"date": "$date", "unit": "hour"}},
+                    "timeunit": {"$dateTrunc": {"date": "$date", "unit": "month"}},
                     "id_dict": "$id_dict",
                 },
                 "avgValue": {"$avg": "$value"},
@@ -53,6 +53,12 @@ max_month_close = sampleCol.aggregate(
                 "minEpoch": {"$min": "$epoch"},
             }
         },
+
+        # stage 3 - sorting results
+        { "$sort" : { "_id.timeunit" : 1} },
+
+        # Stage 4 - limit
+        { "$limit" : 5 }
     ],
 allowDiskUse=True
 )
