@@ -24,6 +24,7 @@ end_time02 = datetime.utcnow()
 time_taken02 = (end_time02 - start_time02).total_seconds()
 print(f"time taken02: {time_taken02} seconds")
 
+# dateTrunc - Documentation: https://www.mongodb.com/docs/manual/reference/operator/aggregation/dateTrunc/
 
 start_time = datetime.utcnow()
 max_month_close = sampleCol.aggregate(
@@ -45,7 +46,7 @@ max_month_close = sampleCol.aggregate(
         {
             "$group": {
                 "_id": {
-                    "timeunit": {"$dateTrunc": {"date": "$date", "unit": "month"}},
+                    "timeunit": {"$dateTrunc": {"date": "$date", "unit": "month", "binSize": 3}},
                     "id_dict": "$id_dict",
                 },
                 "avgValue": {"$avg": "$value"},
