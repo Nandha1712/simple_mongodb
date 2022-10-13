@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: qualdo
+  annotations:
+    service.beta.kubernetes.io/azure-dns-label-name: qld-mongo-check
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+  selector:
+    app: mongodb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: qualdo
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        securityContext:
+          readOnlyRootFilesystem: true
+        image: mongo:6.0.2
+        command:
+         - "sleep"
+         - "3600"
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: password
+        volumeMounts:
+        - mountPath: /data/db
+          name: azure-db-vol
+        - mountPath: /data/configdb
+          name: azure-db-vol
+      volumes:
+        - name: azure-db-vol
+          persistentVolumeClaim:
+            claimName: mongo-db-pvc

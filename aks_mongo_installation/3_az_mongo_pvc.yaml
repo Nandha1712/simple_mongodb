@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-db-pv
+  namespace: qualdo
+  labels:
+    usage: mongo-db-pv
+spec:
+  storageClassName: azurefile-mongo-sc
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  azureFile:
+    secretName: azure-mongo-secret
+    shareName: <dummy>
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-db-pvc
+  namespace: qualdo
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile-mongo-sc
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    # To make sure we match the claim with the exact volume, match the label
+    matchLabels:
+      usage: mongo-db-pv
