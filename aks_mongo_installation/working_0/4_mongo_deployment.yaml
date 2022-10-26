@@ -6,7 +6,7 @@ metadata:
   annotations:
     service.beta.kubernetes.io/azure-dns-label-name: mongo-check-nandha
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 27017
       targetPort: 27017
@@ -43,7 +43,12 @@ spec:
           volumeMounts:
             - name: ref1-azure-vol-test1
               mountPath: /data/db
-      volumes:
-        - name: ref1-azure-vol
-          persistentVolumeClaim:
-            claimName: ref1-mongo-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: ref1-azure-vol-test1
+      spec:
+        storageClassName: "managed-csi"
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
