@@ -1,0 +1,21 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: ref1-azurefile-mongo-sc
+provisioner: kubernetes.io/azure-file
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=0
+  - gid=0
+  - mfsymlinks
+  - cache=strict
+parameters:
+  skuName: Standard_LRS
+  location: eastus
+  storageAccount: qualdodevmongo1
+  resourceGroup: dev_qualdo
+  secretNamespace: "qualdo"
+  secretName: ref1-azure-mongo-secret
+reclaimPolicy: Retain
+allowVolumeExpansion: true
