@@ -1,5 +1,3 @@
-https://www.intuitive.cloud/deploy-mongodb-cluster-as-a-microservice-on-kubernetes-with-persistent-storage/
-
 
 
 rs.initiate()
